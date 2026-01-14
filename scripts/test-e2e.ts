@@ -6,7 +6,7 @@ import { readFileSync } from 'fs';
 dotenv.config();
 
 // Load the PR ID
-const owner = process.argv[2] ||'demandio';
+const owner = process.argv[2] || 'demandio';
 const repo = process.argv[3] || 'simplycodes-extension';
 const prId = process.argv[4] || 982;
 const projectContext = process.argv[5] || 'This is a browser extension for SimplyCodes';
@@ -30,9 +30,11 @@ process.env.GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_
 
 // Set action inputs (these would normally come from action.yml)
 process.env.INPUT_GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-process.env.INPUT_AI_PROVIDER = process.env.AI_PROVIDER || 'openai';
-process.env.INPUT_AI_API_KEY = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
-process.env.INPUT_AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
+process.env.INPUT_AI_PROVIDER = process.env.AI_PROVIDER || 'custom';
+process.env.INPUT_AI_API_KEY = process.env.AI_API_KEY;
+process.env.INPUT_AI_MODEL = process.env.AI_MODEL || 'minimax-m2.1';
+process.env.INPUT_AI_BASE_URL = process.env.AI_BASE_URL || "https://api.minimax.io/v1/text/chatcompletion_v2"
+
 // process.env.INPUT_REVIEW_MAX_COMMENTS = process.env.INPUT_REVIEW_MAX_COMMENTS || '10';
 process.env.INPUT_EXCLUDE_PATTERNS = '**/*.lock,**/*.json,**/*.md';
 process.env.INPUT_APPROVE_REVIEWS = 'true';
