@@ -8,6 +8,7 @@ AI Code Reviewer is a GitHub Action that leverages multiple AI providers (OpenAI
   - OpenAI (ChatGPT)
   - Anthropic (Claude)
   - Google (Gemini)
+  - Custom (any OpenAI/Anthropic-compatible API - Ollama, Llama.cpp, MiniMax, GLM, LM Studio, vLLM, etc.)
 - Provides intelligent comments and suggestions for improving your code
 - Reviews only new changes in PR updates
 - Filters out files that match specified exclude patterns
@@ -24,6 +25,7 @@ AI Code Reviewer is a GitHub Action that leverages multiple AI providers (OpenAI
    - `OPENAI_API_KEY` for OpenAI
    - `ANTHROPIC_API_KEY` for Claude
    - `GOOGLE_AI_KEY` for Google Gemini
+   - `AI_API_KEY` for Custom AI(Ollama, Llama.cpp, MiniMax, GLM, LM Studio, vLLM, etc.) - This parameter can be empty
 
 3. Create `.github/workflows/code-review.yml`:
 
@@ -40,17 +42,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: AI Code Review
-        uses: your-username/ai-code-reviewer@main
+        uses: your-username/ai-code-reviewer@main # Example: ramonpaolo/ai-code-reviewer@main
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needs the permission to write comment, read code and approve PR
           
           # Choose your AI provider and key
-          AI_PROVIDER: "openai" # or "anthropic" or "google"
+          AI_PROVIDER: "openai" # or "anthropic" or "google" or "custom"
           AI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AI_MODEL: "gpt-4o-mini"
-          AI_TEMPERATURE: 0.3 # 0 to 1 - higher values = more creativity and variance
+          AI_MODEL: "gpt-4o-mini" # or "minimax-m2.1" or "Qwen3-Coder-480B-A35B-Instruct"
+          AI_TEMPERATURE: 0.3 # 0 to 1 - higher values = more creativity and variance; Obs: not affect some models and providers
 
           # Optional configurations
           APPROVE_REVIEWS: true
@@ -64,8 +66,9 @@ jobs:
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `AI_PROVIDER` | AI provider to use (`openai`, `anthropic`, `google`) | `openai` |
-| `AI_API_KEY` | API key for chosen provider | Required |
+| `AI_PROVIDER` | AI provider to use (`openai`, `anthropic`, `google`, `custom`) | `openai` |
+| `AI_API_KEY` | API key for chosen provider (optional for local/custom providers) | Required |
+| `AI_BASE_URL` | Custom API base URL (required for custom providers - must include the full endpoint path like `/v1` or `/v1/text/chatcompletion_v2`) | `""` |
 | `AI_MODEL` | Model to use (see supported models below) | Provider's default |
 | `AI_TEMPERATURE` | Temperature for AI model | `0` |
 | `APPROVE_REVIEWS` | Whether to approve PRs automatically | `true` |
@@ -78,7 +81,44 @@ jobs:
 
 All models supported by the provider should be supported.
 
+### Using Custom Providers (Ollama, LM Studio, MiniMax, vLLM, etc.)
+
+When using the `custom` provider, you must provide the **complete URL** to the API endpoint, including the full path (e.g., `/api/chat`, `/v1/text/chatcompletion_v2`, etc.):
+
+```yaml
+# Example with Ollama (local)
+- name: AI Code Review (Ollama)
+  uses: your-username/ai-code-reviewer@main
+  with:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    AI_PROVIDER: "custom"
+    AI_BASE_URL: "http://some-ollama-url:11434/api/chat"
+    AI_MODEL: "llama3.2"
+    AI_API_KEY: "" # Not needed for Ollama
+
+# Example with MiniMax
+- name: AI Code Review (MiniMax)
+  uses: your-username/ai-code-reviewer@main
+  with:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    AI_PROVIDER: "custom"
+    AI_BASE_URL: "https://api.minimax.io/v1/text/chatcompletion_v2"
+    AI_MODEL: "minimax-m2.1"
+    AI_API_KEY: "your-minimax-api-key"
+```
+
+**Important:** For custom providers, `AI_BASE_URL` must include the complete endpoint path, not just the base domain.
+
 ## Development
+
+Create a `.env` file with your credentials:
+```env
+GITHUB_TOKEN=your_github_token
+AI_PROVIDER=openai  # or anthropic, google, custom
+AI_API_KEY=your_api_key
+AI_MODEL=your_preferred_model
+AI_BASE_URL=url_api
+```
 
 ```bash
 # Install dependencies
@@ -107,9 +147,10 @@ To test the action locally:
 1. Create a `.env` file with your credentials:
 ```env
 GITHUB_TOKEN=your_github_token
-AI_PROVIDER=openai  # or anthropic, google
+AI_PROVIDER=openai  # or anthropic, google, custom
 AI_API_KEY=your_api_key
 AI_MODEL=your_preferred_model
+AI_BASE_URL=url_api
 ```
 
 2. Generate a test PR payload:

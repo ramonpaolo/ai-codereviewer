@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import { OpenAIProvider } from './providers/OpenAIProvider';
 import { AnthropicProvider } from './providers/AnthropicProvider';
 import { GeminiProvider } from './providers/GeminiProvider';
+import { CustomProvider } from './providers/CustomProvider';
 import { ReviewService } from './services/ReviewService';
 import { GitHubService } from './services/GitHubService';
 import { DiffService } from './services/DiffService';
@@ -13,6 +14,7 @@ async function main() {
     const provider = core.getInput('AI_PROVIDER');
     const model = core.getInput('AI_MODEL');
     const apiKey = core.getInput('AI_API_KEY');
+    const baseUrl = core.getInput('AI_BASE_URL');
     const githubToken = core.getInput('GITHUB_TOKEN');
     const temperature = parseFloat(core.getInput('AI_TEMPERATURE') || '0');
 
@@ -28,6 +30,7 @@ async function main() {
     await aiProvider.initialize({
       apiKey,
       model,
+      baseUrl,
       temperature,
     });
 
@@ -67,6 +70,8 @@ function getProvider(provider: string) {
       return new AnthropicProvider();
     case 'google':
       return new GeminiProvider();
+    case 'custom':
+      return new CustomProvider();
     default:
       throw new Error(`Unsupported AI provider: ${provider}`);
   }

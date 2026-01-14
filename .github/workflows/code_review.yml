@@ -1,4 +1,4 @@
-name: Code Review with OpenAI
+name: Code Review with MiniMax
 
 on:
   pull_request:
@@ -10,17 +10,20 @@ permissions: write-all
 
 jobs:
   code_review:
+    timeout-minutes: 1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: AI Code Reviewer
-        uses: ./.
+        uses: ramonpaolo/ai-codereviewer@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_API_MODEL: "gpt-4o-mini"
-          REVIEW_MAX_COMMENTS: 5 # Optional: defaults to 10
+          AI_BASE_URL: "https://api.minimax.io/v1/text/chatcompletion_v2"
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_MODEL: "MiniMax-M2.1"
+          AI_PROVIDER: "custom"
+
           APPROVE_REVIEWS: true # Optional: defaults to false
-          exclude: "yarn.lock,dist/**"
+          EXCLUDE_PATTERNS: "**/*.lock,**/*-lock.json"
